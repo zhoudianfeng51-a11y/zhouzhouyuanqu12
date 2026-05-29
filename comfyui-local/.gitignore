@@ -1,0 +1,14 @@
+.venv-comfyui*/
+__pycache__/
+logs/
+*.pid
+last_txt2img_workflow.json
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.safetensors
+*.ckpt
+*.pth
+*.bin
+*.onnx
