@@ -63,6 +63,8 @@ class ViewSpec:
     width: int
     height: int
     pose_ref: str | None = None
+    init_image_ref: str | None = None
+    denoise: float = 1.0
     face_weight: float = 0.82
     lora_strength: float = 0.62
     pose_strength: float = 0.55
@@ -83,6 +85,8 @@ VIEWS: dict[str, ViewSpec] = {
         ),
         width=512,
         height=640,
+        init_image_ref=REFERENCE_FILES["front_face"],
+        denoise=0.22,
         face_weight=0.92,
         lora_strength=0.72,
     ),
@@ -98,6 +102,8 @@ VIEWS: dict[str, ViewSpec] = {
         ),
         width=512,
         height=640,
+        init_image_ref=REFERENCE_FILES["left45_face"],
+        denoise=0.18,
         face_weight=0.88,
         lora_strength=0.68,
     ),
@@ -113,6 +119,8 @@ VIEWS: dict[str, ViewSpec] = {
         ),
         width=512,
         height=640,
+        init_image_ref=REFERENCE_FILES["right45_face"],
+        denoise=0.18,
         face_weight=0.88,
         lora_strength=0.68,
     ),
@@ -129,6 +137,8 @@ VIEWS: dict[str, ViewSpec] = {
         ),
         width=512,
         height=768,
+        init_image_ref=REFERENCE_FILES["front_fullbody"],
+        denoise=0.36,
         face_weight=0.78,
         lora_strength=0.58,
         pose_strength=0.72,
@@ -307,14 +317,6 @@ def build_workflow(spec: ViewSpec, args: argparse.Namespace) -> dict:
             "class_type": "CLIPTextEncode",
             "inputs": {"text": args.negative, "clip": ["4", 1]},
         },
-        "5": {
-            "class_type": "EmptyLatentImage",
-            "inputs": {
-                "width": spec.width,
-                "height": spec.height,
-                "batch_size": 1,
-            },
-        },
         "3": {
             "class_type": "KSampler",
             "inputs": {
@@ -323,7 +325,7 @@ def build_workflow(spec: ViewSpec, args: argparse.Namespace) -> dict:
                 "cfg": spec.cfg,
                 "sampler_name": args.sampler,
                 "scheduler": args.scheduler,
-                "denoise": 1.0,
+                "denoise": spec.denoise,
                 "model": ["22", 0],
                 "positive": ["6", 0],
                 "negative": ["7", 0],
@@ -339,6 +341,32 @@ def build_workflow(spec: ViewSpec, args: argparse.Namespace) -> dict:
             "inputs": {"filename_prefix": f"nine_view/{spec.filename}_候选", "images": ["8", 0]},
         },
     }
+
+    if spec.init_image_ref:
+        workflow["40"] = {"class_type": "LoadImage", "inputs": {"image": spec.init_image_ref}}
+        workflow["41"] = {
+            "class_type": "ImageScale",
+            "inputs": {
+                "image": ["40", 0],
+                "upscale_method": "lanczos",
+                "width": spec.width,
+                "height": spec.height,
+                "crop": "center",
+            },
+        }
+        workflow["5"] = {
+            "class_type": "VAEEncode",
+            "inputs": {"pixels": ["41", 0], "vae": ["4", 2]},
+        }
+    else:
+        workflow["5"] = {
+            "class_type": "EmptyLatentImage",
+            "inputs": {
+                "width": spec.width,
+                "height": spec.height,
+                "batch_size": 1,
+            },
+        }
 
     if spec.pose_ref:
         workflow["30"] = {"class_type": "LoadImage", "inputs": {"image": spec.pose_ref}}

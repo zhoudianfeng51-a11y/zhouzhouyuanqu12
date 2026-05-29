@@ -76,23 +76,15 @@
       ]
     }
   },
-  "5": {
-    "class_type": "EmptyLatentImage",
-    "inputs": {
-      "width": 512,
-      "height": 640,
-      "batch_size": 1
-    }
-  },
   "3": {
     "class_type": "KSampler",
     "inputs": {
-      "seed": 488347952,
+      "seed": 1066226990,
       "steps": 12,
       "cfg": 6.0,
       "sampler_name": "euler",
       "scheduler": "normal",
-      "denoise": 1.0,
+      "denoise": 0.28,
       "model": [
         "22",
         0
@@ -131,6 +123,38 @@
       "images": [
         "8",
         0
+      ]
+    }
+  },
+  "40": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "person_face_right45.png"
+    }
+  },
+  "41": {
+    "class_type": "ImageScale",
+    "inputs": {
+      "image": [
+        "40",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "width": 512,
+      "height": 640,
+      "crop": "center"
+    }
+  },
+  "5": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "41",
+        0
+      ],
+      "vae": [
+        "4",
+        2
       ]
     }
   }

@@ -76,18 +76,10 @@
       ]
     }
   },
-  "5": {
-    "class_type": "EmptyLatentImage",
-    "inputs": {
-      "width": 512,
-      "height": 768,
-      "batch_size": 1
-    }
-  },
   "3": {
     "class_type": "KSampler",
     "inputs": {
-      "seed": 1845854099,
+      "seed": 677824669,
       "steps": 12,
       "cfg": 6.0,
       "sampler_name": "euler",
@@ -132,6 +124,14 @@
         "8",
         0
       ]
+    }
+  },
+  "5": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 512,
+      "height": 768,
+      "batch_size": 1
     }
   }
 }
