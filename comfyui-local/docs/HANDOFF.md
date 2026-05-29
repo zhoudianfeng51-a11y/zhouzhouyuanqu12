@@ -39,7 +39,7 @@ ComfyUI 启动日志识别：
 - 设备：MPS
 - 统一内存：16GB
 - Python：3.12.13
-- PyTorch：2.12.0
+- PyTorch：2.6.0
 - ComfyUI：0.22.0
 
 磁盘状态快照：
@@ -135,6 +135,24 @@ cd /Users/a1234/Documents/智能化办公
 
 注意：在 Codex 受限执行环境中，后台 daemon 模式可能在命令结束后被系统回收。桌面双击启动器是推荐方式。
 
+## 当前环境阻塞
+
+2026-05-29 最新状态：
+
+- 已停止 CPU 模式出图。
+- 当前 Python 环境中 `torch.backends.mps.is_built()` 为 `True`。
+- 当前 Python 环境中 `torch.backends.mps.is_available()` 为 `False`。
+- 启动脚本已加保护：未检测到 Apple MPS 时会拒绝启动，避免误用 CPU 长时间跑图。
+
+启动器报错示例：
+
+```text
+Apple MPS is not available in this Python environment.
+Refusing to start in CPU mode. Set COMFYUI_ALLOW_CPU=1 only for diagnostics.
+```
+
+恢复工作流出图前，必须先解决 MPS 可用性。不要在 `COMFYUI_ALLOW_CPU=1` 下跑正式图。
+
 ## 自动化桥接
 
 桥接脚本：
@@ -219,4 +237,3 @@ cd /Users/a1234/Documents/智能化办公
 - 不要把 `.venv-comfyui-py312` 提交到 GitHub。
 - 不要把 output、temp、日志、pid 文件提交到 GitHub。
 - 不要重复安装旧版或来源不明的 IPAdapter / ControlNet 插件。
-

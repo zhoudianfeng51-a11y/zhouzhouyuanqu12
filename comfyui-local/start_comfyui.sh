@@ -43,6 +43,27 @@ if ! python -c "import torch, aiohttp, yaml, PIL" >/dev/null 2>&1; then
   python -m pip install -r "${COMFY_DIR}/requirements.txt"
 fi
 
+if [ "${COMFYUI_ALLOW_CPU:-0}" != "1" ]; then
+  if ! python - <<'PY'
+import sys
+import torch
+sys.exit(0 if torch.backends.mps.is_available() else 1)
+PY
+  then
+    echo "Apple MPS is not available in this Python environment."
+    echo "Refusing to start in CPU mode. Set COMFYUI_ALLOW_CPU=1 only for diagnostics."
+    echo "Python: ${VENV_DIR}/bin/python"
+    "${VENV_DIR}/bin/python" - <<'PY'
+import torch
+print("torch:", torch.__version__)
+print("mps built:", torch.backends.mps.is_built())
+print("mps available:", torch.backends.mps.is_available())
+print("cuda available:", torch.cuda.is_available())
+PY
+    exit 1
+  fi
+fi
+
 cd "${COMFY_DIR}"
 
 if [ "${MODE}" = "--daemon" ] || [ "${MODE}" = "daemon" ]; then
