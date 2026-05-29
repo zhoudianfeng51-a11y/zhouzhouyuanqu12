@@ -22,7 +22,7 @@
 
 双击：
 
-`comfyui-local/Start ComfyUI.command`
+`/Users/a1234/Desktop/Start-ComfyUI.command`
 
 或者在当前目录运行：
 
@@ -34,11 +34,15 @@
 
 `http://127.0.0.1:8188`
 
-默认是前台常驻启动，窗口保持打开时 ComfyUI 才保持在线。需要后台尝试时可以运行：
+默认是前台常驻启动，窗口保持打开时 ComfyUI 才保持在线。启动脚本会先检查 Apple MPS，未检测到 MPS 时会拒绝启动，避免误用 CPU 跑图。
+
+需要后台尝试时可以运行：
 
 ```bash
 ./comfyui-local/start_comfyui.sh --daemon
 ```
+
+正式出图不要使用 `COMFYUI_ALLOW_CPU=1`。这个开关只用于临时诊断。
 
 ## 停止服务
 
@@ -88,3 +92,14 @@
 - MVAdapter 节点代码
 
 现在可先做参考脸锁定、姿态控制和分步人物多视图。SDXL MVAdapter 权重仍属于第二阶段。
+
+## 已验证运行状态
+
+2026-05-29 已验证：
+
+- PyTorch：`2.6.0`
+- ComfyUI 设备：`mps`
+- 服务地址：`http://127.0.0.1:8188`
+- CPU 模式保护：已开启
+
+注意：Codex 普通受限执行环境可能无法访问 Apple MPS。日常使用请从桌面启动器或授权前台环境启动。

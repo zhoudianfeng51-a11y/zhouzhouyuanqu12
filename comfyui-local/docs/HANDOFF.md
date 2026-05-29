@@ -135,14 +135,35 @@ cd /Users/a1234/Documents/智能化办公
 
 注意：在 Codex 受限执行环境中，后台 daemon 模式可能在命令结束后被系统回收。桌面双击启动器是推荐方式。
 
-## 当前环境阻塞
+## 当前运行规则
 
 2026-05-29 最新状态：
 
 - 已停止 CPU 模式出图。
-- 当前 Python 环境中 `torch.backends.mps.is_built()` 为 `True`。
-- 当前 Python 环境中 `torch.backends.mps.is_available()` 为 `False`。
+- 已将 ComfyUI 本地 Python 环境固定到 PyTorch `2.6.0`。
+- 在桌面/授权前台环境中已验证 Apple MPS 可用。
+- ComfyUI API `/system_stats` 已返回设备为 `mps`。
 - 启动脚本已加保护：未检测到 Apple MPS 时会拒绝启动，避免误用 CPU 长时间跑图。
+
+已验证环境信息：
+
+```text
+pytorch version: 2.6.0
+Device: mps
+```
+
+API 验证结果要点：
+
+```text
+"pytorch_version": "2.6.0"
+"type": "mps"
+```
+
+重要边界：
+
+- 正式出图只能在 MPS 可用的桌面/授权前台环境中运行。
+- Codex 普通受限执行环境可能无法看到 Apple MPS，会被启动脚本拦截。
+- 不要在 `COMFYUI_ALLOW_CPU=1` 下跑正式图；这个开关只允许临时诊断。
 
 启动器报错示例：
 
@@ -150,8 +171,6 @@ cd /Users/a1234/Documents/智能化办公
 Apple MPS is not available in this Python environment.
 Refusing to start in CPU mode. Set COMFYUI_ALLOW_CPU=1 only for diagnostics.
 ```
-
-恢复工作流出图前，必须先解决 MPS 可用性。不要在 `COMFYUI_ALLOW_CPU=1` 下跑正式图。
 
 ## 自动化桥接
 
