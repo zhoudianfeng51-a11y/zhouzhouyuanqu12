@@ -17,8 +17,21 @@ LOG_DIR="${WORK_DIR}/logs"
 LOG_FILE="${LOG_DIR}/comfyui-${PORT}.log"
 PID_FILE="${WORK_DIR}/comfyui-${PORT}.pid"
 MODE="${1:-foreground}"
+COMFY_URL="http://${HOST}:${PORT}"
 
 mkdir -p "${LOG_DIR}"
+
+open_comfyui_when_ready() {
+  for _ in $(seq 1 90); do
+    if curl -fsS --max-time 2 "${COMFY_URL}/system_stats" >/dev/null 2>&1; then
+      echo "Opening ComfyUI: ${COMFY_URL}"
+      open "${COMFY_URL}" >/dev/null 2>&1 || true
+      return 0
+    fi
+    sleep 2
+  done
+  return 1
+}
 
 if [ ! -d "${COMFY_DIR}" ]; then
   echo "ComfyUI directory not found: ${COMFY_DIR}"
@@ -26,7 +39,8 @@ if [ ! -d "${COMFY_DIR}" ]; then
 fi
 
 if curl -fsS --max-time 2 "http://${HOST}:${PORT}/system_stats" >/dev/null 2>&1; then
-  echo "ComfyUI is already running: http://${HOST}:${PORT}"
+  echo "ComfyUI is already running: ${COMFY_URL}"
+  open "${COMFY_URL}" >/dev/null 2>&1 || true
   exit 0
 fi
 
@@ -67,18 +81,15 @@ fi
 cd "${COMFY_DIR}"
 
 if [ "${MODE}" = "--daemon" ] || [ "${MODE}" = "daemon" ]; then
-  echo "Starting ComfyUI in background at http://${HOST}:${PORT}"
+  echo "Starting ComfyUI in background at ${COMFY_URL}"
   nohup "${VENV_DIR}/bin/python" main.py --listen "${HOST}" --port "${PORT}" >"${LOG_FILE}" 2>&1 &
   echo "$!" > "${PID_FILE}"
 
-  for _ in $(seq 1 90); do
-    if curl -fsS --max-time 2 "http://${HOST}:${PORT}/system_stats" >/dev/null 2>&1; then
-      echo "ComfyUI is ready: http://${HOST}:${PORT}"
-      echo "Log: ${LOG_FILE}"
-      exit 0
-    fi
-    sleep 2
-  done
+  if open_comfyui_when_ready; then
+    echo "ComfyUI is ready: ${COMFY_URL}"
+    echo "Log: ${LOG_FILE}"
+    exit 0
+  fi
 
   echo "ComfyUI did not become ready in time."
   echo "Log: ${LOG_FILE}"
@@ -87,7 +98,8 @@ if [ "${MODE}" = "--daemon" ] || [ "${MODE}" = "daemon" ]; then
 fi
 
 echo "Log: ${LOG_FILE}"
-echo "Starting ComfyUI in foreground at http://${HOST}:${PORT}"
+echo "Starting ComfyUI in foreground at ${COMFY_URL}"
 echo "Keep this window open while using ComfyUI."
 echo "$$" > "${PID_FILE}"
+open_comfyui_when_ready &
 exec "${VENV_DIR}/bin/python" main.py --listen "${HOST}" --port "${PORT}" 2>&1 | tee "${LOG_FILE}"
