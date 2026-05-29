@@ -16,6 +16,8 @@
 
 `comfyui-local/docs/GITHUB_HANDOFF.md`
 
+`comfyui-local/docs/NINE_VIEW_IDENTITY_WORKFLOW.md`
+
 注意：不要把模型、输出图片、虚拟环境、日志提交到 GitHub。
 
 ## 一键启动
@@ -98,6 +100,22 @@
 - MVAdapter 节点代码
 
 现在可先做参考脸锁定、姿态控制和分步人物多视图。SDXL MVAdapter 权重仍属于第二阶段。
+
+## 人物 9 视图标准工作流
+
+执行器：
+
+```bash
+./comfyui-local/nine_view_identity_workflow.py plan
+./comfyui-local/nine_view_identity_workflow.py build-all
+./comfyui-local/nine_view_identity_workflow.py run --view 01
+```
+
+标准输出目录：
+
+`/Users/a1234/Documents/comfy/ComfyUI/output/人物九视图工作流`
+
+原则：先冻结 `01-03` 头脸锁脸，再做 `04` 正面全身，最后补 `05-09`。服装只作为占位服，不作为最终造型锁定。
 
 ## 已验证运行状态
 
